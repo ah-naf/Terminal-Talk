@@ -7,6 +7,7 @@ const {
   showSpinner,
   writeMessage,
 } = require("./util");
+const path = require("path");
 
 const host = "127.0.0.1";
 const port = 3008;
@@ -25,6 +26,24 @@ const handleMessage = async (socket, username) => {
     socket.write(JSON.stringify({ type: "see_users" }));
   } else if (message === "\\commands") {
     socket.write(JSON.stringify({ type: "show_commands" }));
+  } else if (message.includes("\\block ")) {
+    username = message.substring(6).trim();
+    socket.write(
+      JSON.stringify({
+        type: "block",
+        username,
+      })
+    );
+  } else if (message.includes("\\unblock ")) {
+    username = message.substring(8).trim();
+    socket.write(
+      JSON.stringify({
+        type: "unblock",
+        username,
+      })
+    );
+  } else if (message === "\\blocked") {
+    socket.write(JSON.stringify({ type: "blocked" }));
   } else {
     socket.write(
       JSON.stringify({
@@ -73,6 +92,7 @@ const handleMessage = async (socket, username) => {
 
     console.log("\nConnected to the server.");
     console.log(`Your username is "${username}". Enjoy Terminal Talk...\n`);
+    console.log('----> Type "\\exit" to exit Terminal Talk. <----');
     console.log('----> Type "\\commands" to show useful commands <----\n');
 
     socket.on("data", async (data) => {

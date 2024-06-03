@@ -1,12 +1,15 @@
 const net = require("net");
+const fs = require("fs");
 
 const server = net.createServer();
 
 let clients = [];
 
 const COMMANDS = [
-  '1. Type "\\exit" to exit Terminal Talk...',
-  '2. Type "\\users" to see which users are currently active...',
+  '1. Type "\\users" to see which users are currently active...',
+  '2. Type "\\block {username}" to block a user...',
+  '3. Type "\\unblock {username}" to unblock a user...',
+  '4. Type "\\blocked" to see whom you have blocked...',
 ];
 
 server.on("connection", (socket) => {
@@ -15,7 +18,7 @@ server.on("connection", (socket) => {
 
   socket.on("data", (data) => {
     const dataObject = JSON.parse(data.toString("utf-8"));
-
+    // console.log(dataObject);
     if (dataObject.type === "new_connection") {
       const usernameExist = clients.find(
         (client) => client.username === dataObject.username
@@ -33,16 +36,39 @@ server.on("connection", (socket) => {
             })
           )
         );
-        clients.push({ socket, username });
+        clients.push({ socket, username, blockedUsers: [] });
       }
     } else if (dataObject.type === "message") {
       clients.forEach((client) => {
-        client.socket.write(JSON.stringify({ ...dataObject }));
+        const sender = clients.find((c) => c.username === username);
+        const receiver = client;
+
+        // Skip sending the message to the sender themselves
+        // if (receiver.username !== sender.username) {
+        const isBlockedBySender = sender.blockedUsers.includes(
+          receiver.username
+        );
+        const isBlockedByReceiver = receiver.blockedUsers.includes(
+          sender.username
+        );
+
+        // Only send the message if neither has blocked the other
+        if (!isBlockedBySender && !isBlockedByReceiver) {
+          receiver.socket.write(JSON.stringify({ ...dataObject }));
+        }
+        // }
       });
     } else if (dataObject.type === "see_users") {
       const userList = clients
-        .map((client) => client.username)
-        .filter((client) => client !== username);
+        .filter((client) => {
+          const isNotSelf = client.username !== username;
+          const isNotBlockedByMe = !client.blockedUsers.includes(username);
+          const isNotBlockingMe = !clients
+            .find((c) => c.username === username)
+            .blockedUsers.includes(client.username);
+          return isNotSelf && isNotBlockedByMe && isNotBlockingMe;
+        })
+        .map((client) => client.username);
 
       const numberOfUser = userList.length;
       socket.write(
@@ -60,6 +86,89 @@ server.on("connection", (socket) => {
           data: "\n" + COMMANDS.join("\n") + "\n",
         })
       );
+    } else if (dataObject.type === "block") {
+      const userToBlock = dataObject.username;
+
+      // console.log(clients);
+      const client = clients.find((client) => client.username === username);
+      const userExist = clients.find(
+        (client) =>
+          client.username === userToBlock &&
+          !client.blockedUsers.includes(username)
+      );
+      // console.log(userExist);
+      if (!userExist) {
+        socket.write(
+          JSON.stringify({
+            type: "message",
+            data: `* User ${userToBlock} does not exist.`,
+          })
+        );
+      } else if (client) {
+        if (!client.blockedUsers.includes(userToBlock)) {
+          client.blockedUsers.push(userToBlock);
+          socket.write(
+            JSON.stringify({
+              type: "message",
+              data: `* You have blocked ${userToBlock}.`,
+            })
+          );
+        } else {
+          socket.write(
+            JSON.stringify({
+              type: "message",
+              data: `* ${userToBlock} is already blocked.`,
+            })
+          );
+        }
+      }
+    } else if (dataObject.type === "blocked") {
+      const client = clients.find((client) => client.username === username);
+      const blockedUsersList = client.blockedUsers.join(", ");
+
+      socket.write(
+        JSON.stringify({
+          type: "message",
+          data: `* You have blocked the following users: ${
+            blockedUsersList || "No users blocked"
+          }.`,
+        })
+      );
+    } else if (dataObject.type === "unblock") {
+      const userToUnblock = dataObject.username;
+      const client = clients.find((client) => client.username === username);
+      const userExist = clients.find(
+        (client) =>
+          client.username === userToUnblock &&
+          !client.blockedUsers.includes(username)
+      );
+      if (!userExist) {
+        socket.write(
+          JSON.stringify({
+            type: "message",
+            data: `* User ${userToUnblock} does not exist.`,
+          })
+        );
+      } else if (client) {
+        if (client.blockedUsers.includes(userToUnblock)) {
+          client.blockedUsers = client.blockedUsers.filter(
+            (user) => user !== userToUnblock
+          );
+          socket.write(
+            JSON.stringify({
+              type: "message",
+              data: `* You have unblocked ${userToUnblock}.`,
+            })
+          );
+        }
+      } else {
+        socket.write(
+          JSON.stringify({
+            type: "message",
+            data: `* User ${userToUnblock} is not blocked.`,
+          })
+        );
+      }
     }
   });
 
