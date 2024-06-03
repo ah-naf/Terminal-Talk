@@ -30,6 +30,11 @@ const welcomeMessage = () => {
   console.log();
 };
 
+const showCommands = () => {
+  console.log('1. Type "\\exit" to exit Terminal Talk...');
+  console.log('2. Type "\\users" to see which users are currently active...\n');
+};
+
 function showSpinner(message) {
   const spinnerChars = ["|", "/", "-", "\\"];
   let i = 0;
@@ -70,5 +75,6 @@ module.exports = {
   welcomeMessage,
   askForUsername,
   showSpinner,
+  showCommands,
   writeMessage,
 };

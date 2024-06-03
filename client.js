@@ -16,6 +16,25 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
+const handleMessage = async (socket, username) => {
+  const message = await writeMessage(username, rl);
+  if (message === "\\exit") {
+    socket.end();
+    process.exit(0);
+  } else if (message === "\\users") {
+    socket.write(JSON.stringify({ type: "see_users" }));
+  } else if (message === "\\commands") {
+    socket.write(JSON.stringify({ type: "show_commands" }));
+  } else {
+    socket.write(
+      JSON.stringify({
+        type: "message",
+        data: `> ${username} : ${message}`,
+      })
+    );
+  }
+};
+
 (async function () {
   welcomeMessage();
 
@@ -27,14 +46,18 @@ const rl = readline.createInterface({
         const message = `Checking if username "${username}" exists`;
         const spinner = showSpinner(message);
 
-        socket.write(JSON.stringify({ type: "new_connection", username }));
+        setTimeout(() => {
+          socket.write(JSON.stringify({ type: "new_connection", username }));
 
-        socket.once("data", (data) => {
-          clearInterval(spinner);
-          process.stdout.write("\r"); // Clear the spinner
-          const dataObject = JSON.parse(data.toString("utf-8"));
-          resolve(dataObject.data);
-        });
+          socket.once("data", async (data) => {
+            await clearConsole();
+            await clearConsole();
+            clearInterval(spinner);
+            process.stdout.write("\r"); // Clear the spinner
+            const dataObject = JSON.parse(data.toString("utf-8"));
+            resolve(dataObject.data);
+          });
+        }, 1000);
       });
     };
 
@@ -48,9 +71,9 @@ const rl = readline.createInterface({
       usernameExists = await checkUsername(username);
     }
 
-    console.log("\nConnected to the server");
-    console.log(`Your username is "${username}". Enjoy Terminal Talk...`);
-    console.log('Type "\\exit" to exit Terminal Talk...\n');
+    console.log("\nConnected to the server.");
+    console.log(`Your username is "${username}". Enjoy Terminal Talk...\n`);
+    console.log('----> Type "\\commands" to show useful commands <----\n');
 
     socket.on("data", async (data) => {
       const dataObject = JSON.parse(data.toString("utf-8"));
@@ -58,30 +81,10 @@ const rl = readline.createInterface({
         console.log();
         await clearConsole();
         console.log(dataObject.data);
-        const message = await writeMessage(username, rl);
-        if (message === "\\exit") {
-          socket.end();
-          process.exit(0);
-        } else
-          socket.write(
-            JSON.stringify({
-              type: "message",
-              data: `> ${username} : ${message}`,
-            })
-          );
+        await handleMessage(socket, username);
       }
     });
 
-    const message = await writeMessage(username, rl);
-    if (message === "\\exit") {
-      socket.end();
-      process.exit(0);
-    } else
-      socket.write(
-        JSON.stringify({
-          type: "message",
-          data: `> ${username} : ${message}`,
-        })
-      );
+    await handleMessage(socket, username);
   });
 })();
