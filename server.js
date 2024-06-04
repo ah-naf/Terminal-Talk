@@ -202,6 +202,6 @@ server.on("connection", (socket) => {
   });
 });
 
-server.listen(3008, "terminal-talk-production.up.railway.app", () => {
+server.listen(process.env.PORT || 3008, "0.0.0.0", () => {
   console.log("Opened server on ", server.address());
 });
