@@ -88,7 +88,15 @@ server.on("connection", (socket) => {
       );
     } else if (dataObject.type === "block") {
       const userToBlock = dataObject.username;
-
+      if (userToBlock === username) {
+        socket.write(
+          JSON.stringify({
+            type: "message",
+            data: `* You can't block your own account.`,
+          })
+        );
+        return;
+      }
       // console.log(clients);
       const client = clients.find((client) => client.username === username);
       const userExist = clients.find(
@@ -122,20 +130,17 @@ server.on("connection", (socket) => {
           );
         }
       }
-    } else if (dataObject.type === "blocked") {
-      const client = clients.find((client) => client.username === username);
-      const blockedUsersList = client.blockedUsers.join(", ");
-
-      socket.write(
-        JSON.stringify({
-          type: "message",
-          data: `* You have blocked the following users: ${
-            blockedUsersList || "No users blocked"
-          }.`,
-        })
-      );
     } else if (dataObject.type === "unblock") {
       const userToUnblock = dataObject.username;
+      if (userToUnblock === username) {
+        socket.write(
+          JSON.stringify({
+            type: "message",
+            data: `* You can't unblock your own account`,
+          })
+        );
+        return;
+      }
       const client = clients.find((client) => client.username === username);
       const userExist = clients.find(
         (client) =>
@@ -160,15 +165,27 @@ server.on("connection", (socket) => {
               data: `* You have unblocked ${userToUnblock}.`,
             })
           );
+        } else {
+          socket.write(
+            JSON.stringify({
+              type: "message",
+              data: `* User ${userToUnblock} is not blocked.`,
+            })
+          );
         }
-      } else {
-        socket.write(
-          JSON.stringify({
-            type: "message",
-            data: `* User ${userToUnblock} is not blocked.`,
-          })
-        );
       }
+    } else if (dataObject.type === "blocked") {
+      const client = clients.find((client) => client.username === username);
+      const blockedUsersList = client.blockedUsers.join(", ");
+
+      socket.write(
+        JSON.stringify({
+          type: "message",
+          data: `* You have blocked the following users: ${
+            blockedUsersList || "No users blocked"
+          }.`,
+        })
+      );
     }
   });
 

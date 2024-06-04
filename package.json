@@ -1,0 +1,13 @@
+{
+  "name": "terminal-talk",
+  "version": "1.0.0",
+  "description": "Terminal Talk is a simple chat application built using Node.js and the `net` module. It allows users to chat with each other, block and unblock users, and see the list of currently active users.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "Ahnaf Hasan Shifat",
+  "license": "ISC"
+}
