@@ -5,16 +5,14 @@ It allows users to chat with each other, block and unblock users, and see the li
 
 ## Demo Video
 
-<video width="700" height="400" controls>
-  <source src="./terminal-talk.mp4" type="video/mp4">
-</video>
+https://github.com/ah-naf/Terminal-Talk/assets/81911439/92f05e12-3946-474c-87ea-25d3aad587bb
 
 Check out the demo video to see Terminal Talk in action!
 
 ## Features
 
 - View the list of currently active users.
-- Send and receive messages in real-time.
+- Send and receive messages in real time.
 - Block and unblock users.
 - View the list of blocked users.
 
