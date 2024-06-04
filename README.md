@@ -78,3 +78,22 @@ Once the client is started, you will be prompted to enter a username. After ente
 ### Chatting
 
 To send a message to all users, simply type your message and press Enter. Your message will be broadcasted to all users who have not blocked you and whom you have not blocked.
+
+## Join the Server
+
+To join the server and start chatting with others, follow these steps:
+
+1. Download the client file from the [repository](https://github.com/ah-naf/terminal-talk).
+2. Open the client file and set the following constants:
+
+   ```javascript
+   const host = "roundhouse.proxy.rlwy.net";
+   const port = 44004;
+   ```
+
+3. Run the client file.
+4. Enter a username when prompted.
+5. Start chatting and enjoy!
+
+Feel free to join and interact with other users on the server!
+

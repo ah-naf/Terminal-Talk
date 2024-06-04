@@ -9,8 +9,8 @@ const {
 } = require("./util");
 const path = require("path");
 
-const host = "127.0.0.1";
-const port = 3008;
+const host = "roundhouse.proxy.rlwy.net";
+const port = 44004;
 
 const rl = readline.createInterface({
   input: process.stdin,
