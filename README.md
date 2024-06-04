@@ -3,6 +3,14 @@
 Terminal Talk is a simple chat application built using Node.js and the `net` module.
 It allows users to chat with each other, block and unblock users, and see the list of currently active users.
 
+## Demo Video
+
+<video width="700" height="400" controls>
+  <source src="./terminal-talk.mp4" type="video/mp4">
+</video>
+
+Check out the demo video to see Terminal Talk in action!
+
 ## Features
 
 - View the list of currently active users.
@@ -96,4 +104,3 @@ To join the server and start chatting with others, follow these steps:
 5. Start chatting and enjoy!
 
 Feel free to join and interact with other users on the server!
-
